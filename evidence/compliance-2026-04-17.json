@@ -1,0 +1,771 @@
+{
+  "timestamp": "2026-04-17T00:28:08Z",
+  "date": "2026-04-17",
+  "framework": "NIST 800-53 Rev 5",
+  "project": "Sentinel",
+  "overall_status": "NON-COMPLIANT",
+  "summary": {
+    "pass": 117,
+    "fail": 1,
+    "warn": 7,
+    "total": 125,
+    "pass_rate": 93,
+    "coverage": {
+      "controls_checked": 121,
+      "controls_applicable": 226,
+      "coverage_pct": 53
+    }
+  },
+  "checks": [
+    {
+      "status": "PASS",
+      "control": "CA-7",
+      "check": "wazuh_agents_active",
+      "detail": "9 agents active (expected >= 7)"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-6",
+      "check": "sca_scores",
+      "detail": "All hardened hosts >= 55%: agent000=68% agent001=78% agent002=80% agent006=68% agent007=77% "
+    },
+    {
+      "status": "PASS",
+      "control": "SI-7",
+      "check": "fim_running",
+      "detail": "FIM active on all agents: agent000=ok agent001=ok agent002=ok agent003=ok agent004=ok agent005=ok agent006=ok agent007=ok "
+    },
+    {
+      "status": "PASS",
+      "control": "SI-4(7)",
+      "check": "active_response",
+      "detail": "5 active-response blocks configured"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-2",
+      "check": "auditd_running",
+      "detail": "5/5 hosts running auditd: agent000=running agent001=running agent002=running agent006=running agent007=running "
+    },
+    {
+      "status": "PASS",
+      "control": "SC-23",
+      "check": "vault_tls_healthy",
+      "detail": "Vault TLS healthy, HTTP 200"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-10",
+      "check": "gitlab_accessible",
+      "detail": "Forgejo responding, HTTP 200"
+    },
+    {
+      "status": "FAIL",
+      "control": "CP-9",
+      "check": "backup_freshness",
+      "detail": "2/3 backup sets fresh: proxmox-snapshot=active vault-backup=0d_ago gitlab-backup=MISSING "
+    },
+    {
+      "status": "PASS",
+      "control": "CM-2",
+      "check": "docker_containers",
+      "detail": "Containers healthy: vault=running seedbox=3 "
+    },
+    {
+      "status": "PASS",
+      "control": "SC-7",
+      "check": "firewall_sca",
+      "detail": "5/5 hosts pass SCA firewall baseline: agent000=68%_pass agent001=78%_pass agent002=80%_pass agent006=68%_pass agent007=77%_pass "
+    },
+    {
+      "status": "PASS",
+      "control": "SI-3",
+      "check": "malware_protection",
+      "detail": "SI-3 satisfied by modern toolchain: Trivy (blocking CI scanner in ci/security.yml), Kyverno (OKD admission control), Cosign (image signing), CrowdSec (runtime threat detection). ClamAV is not used."
+    },
+    {
+      "status": "PASS",
+      "control": "AC-2",
+      "check": "keycloak_health",
+      "detail": "Keycloak sentinel realm OIDC endpoint responding"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-17",
+      "check": "vault_ssh_ca",
+      "detail": "Vault SSH CA public key configured"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-3",
+      "check": "okd_rbac",
+      "detail": "OKD RBAC active with 609 ClusterRoles"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-4",
+      "check": "istio_mtls",
+      "detail": "Istio mesh-wide PeerAuthentication is STRICT"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-6",
+      "check": "vault_policies",
+      "detail": "12 Vault ACL policies defined"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-6(1)",
+      "check": "scc_restricted",
+      "detail": "OKD restricted SCC present as default"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-6(2)",
+      "check": "ssh_root_disabled",
+      "detail": "5/5 hosts pass SSH root login check: iac-control=ok agent001=sca_score_78% agent002=sca_score_80% agent006=sca_score_68% agent008=sca_score_78% "
+    },
+    {
+      "status": "PASS",
+      "control": "AC-7",
+      "check": "pam_faillock",
+      "detail": "Account lockout configured via faillock.conf on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-8",
+      "check": "login_banner",
+      "detail": "SSH login banner configured"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-12",
+      "check": "session_timeout",
+      "detail": "TMOUT configured on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-17(1)",
+      "check": "tailscale_active",
+      "detail": "Tailscale active IP 100.93.186.11"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-14",
+      "check": "cf_access",
+      "detail": "Cloudflare Access responding HTTP 200"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-10",
+      "check": "concurrent_sessions",
+      "detail": "SSH MaxSessions limited to 10"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-2(3)",
+      "check": "auditd_rules",
+      "detail": "54 audit rules loaded on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-3",
+      "check": "audit_content",
+      "detail": "26/54 audit rules have key tags for categorization"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-4",
+      "check": "log_storage",
+      "detail": "/var/log at 62% capacity on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-9",
+      "check": "audit_permissions",
+      "detail": "/var/log/audit permissions 750 on iac-control"
+    },
+    {
+      "status": "WARN",
+      "control": "AU-6",
+      "check": "wazuh_alerts_24h",
+      "detail": "No alerts found today (API returned 0)"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-8",
+      "check": "chrony_ntp",
+      "detail": "System clock synchronized via timedatectl"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-6(4)",
+      "check": "log_forwarding",
+      "detail": "Rsyslog remote forwarding configured on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-11",
+      "check": "log_retention",
+      "detail": "16 logrotate configs on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-12",
+      "check": "aide_installed",
+      "detail": "AIDE installed with database on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "CA-2",
+      "check": "compliance_timer",
+      "detail": "NIST compliance check timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "CA-7(1)",
+      "check": "drift_detection",
+      "detail": "Drift detection timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-3",
+      "check": "terraform_state",
+      "detail": "Terraform uses remote backend (no local state expected)"
+    },
+    {
+      "status": "WARN",
+      "control": "CM-3(2)",
+      "check": "argocd_sync",
+      "detail": "27/28 Healthy, 2/28 Synced (7%)"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-5",
+      "check": "gitops_enforcement",
+      "detail": "28/28 ArgoCD apps have auto-sync enabled"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-7",
+      "check": "unnecessary_services",
+      "detail": "No unnecessary services running on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-7(2)",
+      "check": "kernel_modules_blacklist",
+      "detail": "68 kernel module blacklist entries"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-3(3)",
+      "check": "ci_security_scanning",
+      "detail": "CI pipeline includes trivy and gitleaks"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-8",
+      "check": "component_inventory",
+      "detail": "NetBox DCIM inventory accessible (HTTP 403)"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-2",
+      "check": "dr_scripts",
+      "detail": "5 DR recovery scripts in place"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-4",
+      "check": "dr_test_evidence",
+      "detail": "DR test evidence exists (54 days old)"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-7",
+      "check": "ha_keepalived",
+      "detail": "Keepalived active with VIP 10.0.0.1"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-9(1)",
+      "check": "minio_replication",
+      "detail": "MinIO primary and replica both healthy"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-9(2)",
+      "check": "etcd_backup",
+      "detail": "etcd backup timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-2",
+      "check": "keycloak_sso",
+      "detail": "Keycloak SSO active issuer https://auth.208.haist.farm/realms/sentinel"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-2(1)",
+      "check": "mfa_configured",
+      "detail": "Keycloak sentinel realm active (OTP enabled for admin)"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-2(12)",
+      "check": "vault_auth_methods",
+      "detail": "2 non-token auth methods: approle/ kubernetes/ token/"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-5",
+      "check": "password_policy",
+      "detail": "pwquality.conf has 5 strength rules"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-5(2)",
+      "check": "ssh_cert_auth",
+      "detail": "SSH cert-only auth enforced on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-5(13)",
+      "check": "vault_token_ttl",
+      "detail": "Vault token max TTL set to 768h"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-4",
+      "check": "identifier_management",
+      "detail": "UID_MIN set to 1000 in login.defs"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-8",
+      "check": "non_org_users",
+      "detail": "Only root has UID 0"
+    },
+    {
+      "status": "PASS",
+      "control": "IR-4",
+      "check": "wazuh_ar_rules",
+      "detail": "5 active-response rules configured via API"
+    },
+    {
+      "status": "WARN",
+      "control": "IR-6",
+      "check": "alert_notifications",
+      "detail": "No notification integrations found in Wazuh"
+    },
+    {
+      "status": "WARN",
+      "control": "IR-5",
+      "check": "alert_volume",
+      "detail": "Low alert volume (0) - may indicate gaps"
+    },
+    {
+      "status": "PASS",
+      "control": "MA-2",
+      "check": "maintenance_mode",
+      "detail": "Maintenance mode script available and executable"
+    },
+    {
+      "status": "PASS",
+      "control": "MP-5",
+      "check": "vault_encryption",
+      "detail": "Vault encryption active seal type: transit"
+    },
+    {
+      "status": "PASS",
+      "control": "PE-14",
+      "check": "idrac_monitoring",
+      "detail": "iDRAC watchdog timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "RA-5",
+      "check": "vulnerability_scanning",
+      "detail": "Trivy vulnerability scanning in CI pipeline"
+    },
+    {
+      "status": "PASS",
+      "control": "RA-5(3)",
+      "check": "secret_scanning",
+      "detail": "Gitleaks secret scanning in CI pipeline"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-2",
+      "check": "namespace_network_policies",
+      "detail": "67 NetworkPolicies across cluster"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-5",
+      "check": "crowdsec_active",
+      "detail": "CrowdSec (2 procs) and firewall bouncer (1 procs) running on pangolin agent"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-7(5)",
+      "check": "squid_egress",
+      "detail": "Squid egress proxy active on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-7(7)",
+      "check": "cloudflare_tunnel",
+      "detail": "cloudflared process running on pangolin (agent 002, 1 procs)"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-8",
+      "check": "traefik_tls",
+      "detail": "Traefik TLS termination working (HTTPS responding)"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-8(1)",
+      "check": "tls_cert_valid",
+      "detail": "TLS cert valid for 81 more days"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-12",
+      "check": "vault_seal_status",
+      "detail": "Vault is unsealed and operational"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-12(1)",
+      "check": "transit_unseal_timer",
+      "detail": "Transit auto-unseal timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-28",
+      "check": "minio_tls",
+      "detail": "MinIO accessible via TLS proxy"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-39",
+      "check": "process_isolation",
+      "detail": "21 SecurityContextConstraints enforcing pod isolation"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-13",
+      "check": "crypto_protection",
+      "detail": "TLS TLSv1.3 enforced on Traefik endpoints"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-10",
+      "check": "network_disconnect",
+      "detail": "SSH ClientAliveInterval set to 300s"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-2",
+      "check": "unattended_upgrades",
+      "detail": "Unattended security upgrades active on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-4",
+      "check": "wazuh_rules_loaded",
+      "detail": "4535 Wazuh rules loaded"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-4(2)",
+      "check": "wazuh_custom_rules",
+      "detail": "23 custom Wazuh rules in local_rules.xml"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-4(4)",
+      "check": "inbound_monitoring",
+      "detail": "Traefik process running on pangolin (agent 002, 1 procs)"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-7(1)",
+      "check": "kyverno_policies",
+      "detail": "7 Kyverno ClusterPolicies enforcing integrity"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-5",
+      "check": "nvd_accessible",
+      "detail": "NIST NVD API accessible"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-7(6)",
+      "check": "harbor_cosign",
+      "detail": "Harbor registry healthy (cosign signing active in CI)"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-7(2)",
+      "check": "aide_database",
+      "detail": "AIDE database 23 days old"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-16",
+      "check": "apparmor_active",
+      "detail": "AppArmor enabled with 0 profiles on iac-control"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-6",
+      "check": "security_verification",
+      "detail": "AIDE check ran within 0 days"
+    },
+    {
+      "status": "PASS",
+      "control": "AT-1",
+      "check": "training_policy",
+      "detail": "Security training referenced in compliance documentation"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-1",
+      "check": "policy_doc_exists",
+      "detail": "Access control policy document exists (68 days old)"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-5",
+      "check": "separation_of_duties",
+      "detail": "Vault least-privilege policy documented"
+    },
+    {
+      "status": "PASS",
+      "control": "AC-11",
+      "check": "session_lock",
+      "detail": "Session timeout configured via /etc/profile.d/session-timeout.sh"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-1",
+      "check": "contingency_plan",
+      "detail": "Contingency/IR plan documentation exists"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-3",
+      "check": "recovery_procedures",
+      "detail": "5 recovery scripts in infrastructure/recovery/"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-5(1)",
+      "check": "password_aging",
+      "detail": "PASS_MAX_DAYS set to 365 in login.defs"
+    },
+    {
+      "status": "PASS",
+      "control": "IA-5(3)",
+      "check": "password_history",
+      "detail": "Password history enforcement configured"
+    },
+    {
+      "status": "PASS",
+      "control": "PL-1",
+      "check": "security_plan_policy",
+      "detail": "Security plan document exists"
+    },
+    {
+      "status": "PASS",
+      "control": "PL-2",
+      "check": "ssp_current",
+      "detail": "Compliance documentation updated within 60 days"
+    },
+    {
+      "status": "PASS",
+      "control": "RA-3",
+      "check": "risk_assessment",
+      "detail": "Risk assessment documentation exists"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-1",
+      "check": "comms_policy",
+      "detail": "Communications/architecture policy document exists"
+    },
+    {
+      "status": "PASS",
+      "control": "IR-1",
+      "check": "ir_plan_current",
+      "detail": "IR plan exists and current (68 days old)"
+    },
+    {
+      "status": "PASS",
+      "control": "SA-22",
+      "check": "component_lifecycle",
+      "detail": "Component lifecycle documentation exists"
+    },
+    {
+      "status": "PASS",
+      "control": "PE-6",
+      "check": "physical_monitoring",
+      "detail": "iDRAC health + watchdog timers active for physical monitoring"
+    },
+    {
+      "status": "WARN",
+      "control": "AT-2",
+      "check": "training_records",
+      "detail": "No formal security awareness training records found"
+    },
+    {
+      "status": "PASS",
+      "control": "AT-3",
+      "check": "role_based_training",
+      "detail": "Role-based security training documentation exists"
+    },
+    {
+      "status": "PASS",
+      "control": "SA-4",
+      "check": "acquisition_security",
+      "detail": "Harbor registry with vulnerability scanning configured"
+    },
+    {
+      "status": "PASS",
+      "control": "SA-8",
+      "check": "secure_development",
+      "detail": "CI pipelines enforce secure development (checkov,gitleaks,trivy)"
+    },
+    {
+      "status": "PASS",
+      "control": "PM-1",
+      "check": "security_program",
+      "detail": "Security program documented (SSP + gap analysis)"
+    },
+    {
+      "status": "PASS",
+      "control": "PM-2",
+      "check": "senior_official",
+      "detail": "Senior security official designated in SSP"
+    },
+    {
+      "status": "PASS",
+      "control": "PM-6",
+      "check": "security_measures",
+      "detail": "Some security performance metrics exist"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-20",
+      "check": "dns_security",
+      "detail": "Internal DNS (dnsmasq) active — authoritative source for cluster resolution"
+    },
+    {
+      "status": "PASS",
+      "control": "CP-6",
+      "check": "alternate_processing",
+      "detail": "Keepalived HA active (config-server connectivity unconfirmed)"
+    },
+    {
+      "status": "WARN",
+      "control": "AU-10",
+      "check": "non_repudiation",
+      "detail": "Cannot verify Wazuh logging config (format=unknown)"
+    },
+    {
+      "status": "PASS",
+      "control": "SI-4(2)",
+      "check": "runtime_monitoring",
+      "detail": "Falco runtime detection active on all 3 nodes"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-2(3)",
+      "check": "keycloak_audit",
+      "detail": "Keycloak audit event logging enabled"
+    },
+    {
+      "status": "PASS",
+      "control": "CM-3(3)",
+      "check": "terraform_drift",
+      "detail": "Terraform drift detection timer active"
+    },
+    {
+      "status": "PASS",
+      "control": "SA-11",
+      "check": "sbom_generation",
+      "detail": "SBOM generation (Syft CycloneDX) in supply chain pipeline"
+    },
+    {
+      "status": "PASS",
+      "control": "RA-5(3)",
+      "check": "vuln_tracking",
+      "detail": "DefectDojo vulnerability tracking platform healthy"
+    },
+    {
+      "status": "PASS",
+      "control": "AU-5",
+      "check": "audit_failure_response",
+      "detail": "4/5 hosts pass auditd failure response check: iac-control=not_configured agent001=sca_78%_pass agent002=sca_80%_pass agent006=sca_68%_pass agent008=sca_78%_pass "
+    },
+    {
+      "status": "PASS",
+      "control": "AU-7",
+      "check": "audit_reduction",
+      "detail": "Wazuh API supports audit record query, filtering, and reduction"
+    },
+    {
+      "status": "PASS",
+      "control": "CA-5",
+      "check": "poam_current",
+      "detail": "POA&M exists and updated 67 days ago: authorization-to-operate.md"
+    },
+    {
+      "status": "PASS",
+      "control": "CA-9",
+      "check": "internal_connections",
+      "detail": "Vault auth backends document system connections: kubernetes, approle"
+    },
+    {
+      "status": "PASS",
+      "control": "MA-4",
+      "check": "nonlocal_maintenance",
+      "detail": "5/5 hosts use SSH-only maintenance (no telnet/VNC/rsh): iac-control=ok agent001=ok agent002=ok agent006=ok agent008=ok "
+    },
+    {
+      "status": "PASS",
+      "control": "PL-4",
+      "check": "rules_of_behavior",
+      "detail": "Rules of behavior document found: SAR-overwatch-platform.md"
+    },
+    {
+      "status": "PASS",
+      "control": "RA-2",
+      "check": "security_categorization",
+      "detail": "Security categorization documented in: SAR-overwatch-platform.md"
+    },
+    {
+      "status": "PASS",
+      "control": "SA-5",
+      "check": "system_documentation",
+      "detail": "5/5 system documentation areas present (docs/, architecture, security, DR, compliance)"
+    },
+    {
+      "status": "WARN",
+      "control": "SA-10",
+      "check": "dev_config_mgmt",
+      "detail": "CI pipeline exists but no branch protection rules found"
+    },
+    {
+      "status": "PASS",
+      "control": "SC-17",
+      "check": "pki_cert_management",
+      "detail": "Vault SSH CA operational for certificate management"
+    }
+  ]
+}

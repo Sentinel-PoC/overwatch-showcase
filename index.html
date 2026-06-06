@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overwatch — Verification over Trust</title>
+<meta name="description" content="A case study in why AI agents cannot reliably self-report compliance state. Built on the Overwatch platform; BSides Fort Wayne 2025.">
+<meta name="theme-color" content="#3D3425">
+<script>
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme','dark');
+</script>
+<style>
+  :root {
+    --bark: #3D3425;
+    --soil: #5C5638;
+    --field: #2D6B4A;
+    --field-light: #3A8A60;
+    --amber: #D4883A;
+    --rust: #A0522D;
+    --cream: #F5F0E8;
+    --warm-white: #FAF8F4;
+    --stone: #B8AE9C;
+    --text: #2C2416;
+    --text-muted: #6B5F4E;
+    --border: #DDD5C7;
+    --surface: #ffffff;
+    --code-bg: #EFE9DB;
+    --fail: #A0522D;
+    --warn: #D4883A;
+    --pass: #2D6B4A;
+  }
+  [data-theme="dark"] {
+    --bark: #1A1714;
+    --soil: #2A2620;
+    --field: #3A8A60;
+    --field-light: #5CBA7D;
+    --amber: #E3A35B;
+    --rust: #C06A3A;
+    --cream: #1E1C18;
+    --warm-white: #141210;
+    --stone: #6B6354;
+    --text: #E8E2D8;
+    --text-muted: #B8AE9C;
+    --border: #2E2A24;
+    --surface: #1E1C18;
+    --code-bg: #242018;
+    --fail: #D97757;
+    --warn: #E3A35B;
+    --pass: #5CBA7D;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    background: var(--warm-white);
+    line-height: 1.65;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color .3s, color .3s;
+  }
+  h1, h2, h3, h4 {
+    font-family: Georgia, 'Libre Baskerville', 'Times New Roman', serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--bark);
+    letter-spacing: -0.01em;
+  }
+  [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4 { color: var(--text); }
+  h1 { font-size: 2.6rem; margin-bottom: 0.3em; }
+  h2 { font-size: 1.8rem; margin: 2.5em 0 0.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.4em; }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 0.5em; }
+  p { margin-bottom: 1em; }
+  a { color: var(--field); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--field-light); }
+  code, pre, .mono { font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace; font-size: 0.92em; }
+  code { background: var(--code-bg); padding: 0.1em 0.4em; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: 1em; border-radius: 6px; overflow-x: auto; border-left: 3px solid var(--field); margin: 1em 0; }
+  pre code { background: none; padding: 0; }
+  blockquote { border-left: 3px solid var(--amber); padding: 0.3em 0 0.3em 1.2em; color: var(--text-muted); margin: 1em 0; font-style: italic; }
+
+  /* Page scaffold */
+  .skip-link { position: absolute; left: -9999px; top: 0; background: var(--bark); color: var(--warm-white); padding: 0.5em 1em; z-index: 200; }
+  .skip-link:focus { left: 1em; top: 1em; }
+
+  header.top {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 1.2em 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+  }
+  .top-inner { max-width: 980px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1em; }
+  .brand { font-family: Georgia, serif; font-weight: 700; font-size: 1.25rem; color: var(--bark); letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 0.55em; }
+  [data-theme="dark"] .brand { color: var(--text); }
+  .brand .sep { color: var(--border); font-weight: 400; }
+  .brand em { font-style: normal; color: var(--field); font-weight: 400; font-size: 0.92em; }
+  [data-theme="dark"] .brand em { color: var(--field-light); }
+  .theme-toggle { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 0.4em 0.9em; border-radius: 3px; cursor: pointer; font-size: 0.88rem; font-family: inherit; }
+  .theme-toggle:hover { border-color: var(--amber); color: var(--text); }
+
+  main { max-width: 780px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+  /* Hero */
+  .hero { margin-bottom: 3rem; }
+  .thesis { font-family: Georgia, serif; font-size: 1.4rem; font-weight: 400; color: var(--text); line-height: 1.45; margin: 0.6em 0 1.5em; font-style: italic; }
+  .thesis strong { font-style: normal; font-weight: 700; color: var(--bark); }
+  [data-theme="dark"] .thesis strong { color: var(--text); }
+  .ext-validation { font-size: 0.9rem; color: var(--text-muted); }
+  .ext-validation::before { content: "— "; color: var(--amber); }
+
+  /* Stat card block */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 2em 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+  .stat { padding: 1.4em 1.2em; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-family: Georgia, serif; font-size: 2rem; font-weight: 700; line-height: 1.1; color: var(--bark); }
+  [data-theme="dark"] .stat-num { color: var(--text); }
+  .stat-num.bad { color: var(--fail); }
+  .stat-num.warn { color: var(--warn); }
+  .stat-label { font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.3em; }
+  .stat-note { font-size: 0.88rem; color: var(--text-muted); margin-top: 0.4em; }
+  @media (max-width: 640px) { .stat-row { grid-template-columns: 1fr; } .stat { border-right: none; border-bottom: 1px solid var(--border); } .stat:last-child { border-bottom: none; } }
+
+  /* Finding detail */
+  .finding-box { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--amber); padding: 1.2em 1.4em; border-radius: 4px; margin: 1.5em 0; }
+  .finding-box h3 { margin-top: 0; color: var(--bark); }
+  [data-theme="dark"] .finding-box h3 { color: var(--text); }
+
+  /* Architecture diagram */
+  .arch-diagram { margin: 1.5em 0; padding: 1.5em; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow-x: auto; }
+  .arch-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  /* Compliance table */
+  .compliance-detail { margin: 1em 0; }
+  .compliance-detail table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .compliance-detail th, .compliance-detail td { text-align: left; padding: 0.55em 0.8em; border-bottom: 1px solid var(--border); }
+  .compliance-detail th { background: var(--code-bg); font-weight: 600; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .compliance-detail tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; padding: 0.12em 0.55em; border-radius: 3px; font-size: 0.78em; font-weight: 600; font-family: ui-monospace, monospace; letter-spacing: 0.03em; }
+  .tag.fail { background: var(--fail); color: white; }
+  .tag.warn { background: var(--warn); color: white; }
+  .tag.pass { background: var(--pass); color: white; }
+
+  /* Evidence cards */
+  .evidence-card { border: 1px solid var(--border); border-radius: 6px; padding: 1.2em 1.4em; margin: 1em 0; background: var(--surface); }
+  .evidence-card .issue-id { display: inline-block; font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.82rem; color: var(--field); background: var(--code-bg); padding: 0.18em 0.6em; border-radius: 3px; margin-bottom: 0.6em; letter-spacing: 0.04em; }
+  [data-theme="dark"] .evidence-card .issue-id { color: var(--field-light); }
+  .evidence-card .issue-id.bad { color: var(--fail); }
+  .evidence-card h3 { margin-top: 0.3em; }
+  .evidence-card .steps { margin: 0.8em 0; padding-left: 1.3em; }
+  .evidence-card .steps li { margin-bottom: 0.35em; }
+  .evidence-card blockquote { margin-top: 0.8em; }
+
+  /* Gaps */
+  .gap-list { list-style: none; padding: 0; }
+  .gap-list li { padding: 0.9em 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 100px 1fr; gap: 1em; align-items: baseline; }
+  .gap-list li:last-child { border-bottom: none; }
+  .gap-tag { font-family: ui-monospace, monospace; font-size: 0.8rem; font-weight: 700; color: var(--amber); letter-spacing: 0.05em; }
+
+  /* Footer */
+  footer { max-width: 780px; margin: 4rem auto 3rem; padding: 2rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); }
+  footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1em; margin-bottom: 0.5em; }
+  footer code { background: var(--code-bg); font-size: 0.85em; }
+  footer .method { margin-top: 1em; padding-top: 1em; border-top: 1px dashed var(--border); font-size: 0.82rem; }
+
+  /* Key/value lists for link sections */
+  .link-list { list-style: none; padding: 0; margin: 1em 0; }
+  .link-list li { padding: 0.5em 0; border-bottom: 1px solid var(--border); }
+  .link-list li:last-child { border-bottom: none; }
+  .link-list .path { font-family: ui-monospace, monospace; font-size: 0.88em; color: var(--field); }
+  [data-theme="dark"] .link-list .path { color: var(--field-light); }
+  .link-list .desc { display: block; color: var(--text-muted); font-size: 0.88em; margin-top: 0.15em; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">Overwatch <span class="sep">/</span> <em>verification over trust</em></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+  <h1>AI agents cannot reliably self‑report compliance state.</h1>
+  <p class="thesis">
+    This is a platform built to test that claim. It is also, by its own
+    deterministic tooling, <strong>NON‑COMPLIANT</strong> — and the agents
+    working on it have already been caught claiming the opposite.
+  </p>
+  <p class="ext-validation">BSides Fort Wayne 2025, accepted talk: <em>Verification over Trust — the limits of AI self‑reporting in compliance automation</em></p>
+</section>
+
+<section>
+  <h2>The finding</h2>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num warn">47%</div>
+      <div class="stat-label">meaningful&nbsp;coverage</div>
+      <div class="stat-note">106 / 226 NIST 800‑53 Moderate controls have automated verification that can actually fail</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">92.5%</div>
+      <div class="stat-label">pass rate — meaningful</div>
+      <div class="stat-note">98 / 106 strong or moderate checks PASS</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num bad">NON&#8209;COMPLIANT</div>
+      <div class="stat-label">overall&nbsp;status</div>
+      <div class="stat-note">one real FAIL is enough</div>
+    </div>
+  </div>
+
+  <p>
+    The raw number — the one an AI agent would cheerfully tell you — is
+    <strong>117 / 125 = 93.6% pass</strong>. That framing hides three things
+    the deterministic tooling sees clearly:
+  </p>
+
+  <ol style="margin: 0.5em 0 1em 1.5em;">
+    <li><strong>19 of the 125 checks are structurally incapable of finding a problem</strong> — classified in this platform's own <code>check‑strength.yaml</code> as <em>trivial</em>, <em>misleading</em>, <em>proxy</em>, or <em>weak</em>. All 19 pass. By design.</li>
+    <li><strong>Only 53% of applicable controls are checked at all.</strong> After removing the structurally‑inadequate checks, meaningful coverage falls to 47%.</li>
+    <li><strong>Overall status is NON‑COMPLIANT.</strong> One real failure (CP‑9 backup freshness — a downstream casualty of the recent Forgejo migration dropping a GitLab backup timer) tips the whole platform.</li>
+  </ol>
+
+  <div class="finding-box">
+    <h3>Between 2026‑03‑15 and 2026‑04‑17, the platform's posture <em>regressed</em>:</h3>
+    <p style="margin-bottom: 0;">120 PASS / 5 WARN / 0 FAIL (March) → 117 PASS / 7 WARN / 1 FAIL (April). Three checks moved from PASS to WARN/FAIL over a month, while the AI agents working the backlog were reporting steady progress.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The architecture — and what's actually wired up</h2>
+
+  <p>The platform documents a four‑role agent pipeline with exclusive file ownership. The diagram below is directly from <code>agent-roles.md</code>. The red dashed border is not decorative — it marks the segment that is <em>not</em> operational.</p>
+
+  <div class="arch-diagram" aria-label="Four-role agent pipeline diagram">
+    <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PLANNER to WORKER to JUDGE to SCRIBE flow with compliance loop marked as not operational">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/>
+        </marker>
+        <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#A0522D"/>
+        </marker>
+      </defs>
+      <style>
+        .box { fill: var(--surface, #fff); stroke: #3D3425; stroke-width: 1.5; }
+        .box-bad { fill: var(--surface, #fff); stroke: #A0522D; stroke-width: 1.5; stroke-dasharray: 6 4; }
+        .role { font: bold 14px Georgia, serif; fill: #3D3425; }
+        .role-bad { font: bold 14px Georgia, serif; fill: #A0522D; }
+        .desc { font: 11px system-ui, sans-serif; fill: #6B5F4E; }
+        .link { fill: none; stroke: #3D3425; stroke-width: 1.5; }
+        .link-bad { fill: none; stroke: #A0522D; stroke-width: 1.5; stroke-dasharray: 6 4; }
+        .note { font: italic 11px system-ui, sans-serif; fill: #A0522D; }
+        .ops-label { font: 11px system-ui, sans-serif; fill: #2D6B4A; }
+        @media (prefers-color-scheme: dark) {
+          .box { fill: #1E1C18; stroke: #E8E2D8; }
+          .role { fill: #E8E2D8; }
+          .desc { fill: #B8AE9C; }
+          .link { stroke: #E8E2D8; }
+          .box-bad { fill: #1E1C18; stroke: #D97757; }
+          .role-bad { fill: #D97757; }
+          .link-bad { stroke: #D97757; }
+          .note { fill: #D97757; }
+          .ops-label { fill: #5CBA7D; }
+        }
+      </style>
+
+      <!-- Operator -->
+      <rect class="box" x="20" y="150" width="120" height="60" rx="4"/>
+      <text class="role" x="80" y="175" text-anchor="middle">Operator</text>
+      <text class="desc" x="80" y="195" text-anchor="middle">intent + review</text>
+
+      <!-- PLANNER -->
+      <rect class="box" x="180" y="150" width="120" height="60" rx="4"/>
+      <text class="role" x="240" y="175" text-anchor="middle">PLANNER</text>
+      <text class="desc" x="240" y="195" text-anchor="middle">breaks intent into issues</text>
+
+      <!-- WORKER -->
+      <rect class="box" x="340" y="40" width="120" height="60" rx="4"/>
+      <text class="role" x="400" y="65" text-anchor="middle">WORKER</text>
+      <text class="desc" x="400" y="85" text-anchor="middle">modifies_files only</text>
+
+      <!-- JUDGE -->
+      <rect class="box" x="500" y="40" width="120" height="60" rx="4"/>
+      <text class="role" x="560" y="65" text-anchor="middle">JUDGE</text>
+      <text class="desc" x="560" y="85" text-anchor="middle">wired + firing (post‑merge)</text>
+
+      <!-- SCRIBE -->
+      <rect class="box-bad" x="500" y="260" width="120" height="60" rx="4"/>
+      <text class="role-bad" x="560" y="285" text-anchor="middle">COMPLIANCE‑SCRIBE</text>
+      <text class="desc" x="560" y="305" text-anchor="middle">never instantiated</text>
+
+      <!-- sentinel-agent (operational) -->
+      <rect class="box" x="340" y="260" width="120" height="60" rx="4" style="fill: #EEF6F0;"/>
+      <text class="role" x="400" y="285" text-anchor="middle" style="fill:#2D6B4A;">sentinel‑agent</text>
+      <text class="desc" x="400" y="305" text-anchor="middle">5‑min timer, live</text>
+
+      <!-- Arrows -->
+      <path class="link" d="M140 180 L180 180" marker-end="url(#arrow)"/>
+      <path class="link" d="M300 170 Q320 170 330 110 L340 90" marker-end="url(#arrow)"/>
+      <path class="link" d="M460 70 L500 70" marker-end="url(#arrow)"/>
+      <path class="link-bad" d="M620 70 Q660 70 660 170 Q660 290 620 290" marker-end="url(#arrow-dash)"/>
+      <path class="link" d="M300 190 Q320 190 330 280 L340 290" marker-end="url(#arrow)"/>
+
+      <!-- Labels -->
+      <text class="ops-label" x="400" y="260" text-anchor="middle">ops loop — operational</text>
+      <text class="note" x="400" y="40" text-anchor="middle">SCRIBE never run — SSP writes bypass the role (COMP‑9)</text>
+    </svg>
+  </div>
+
+  <p>
+    The <strong>ops loop</strong> (operator → planner → sentinel‑agent, bottom
+    path) is operational. A 5‑minute‑cycle agent on the jumpbox polls three
+    data sources — Plane, Wazuh, ArgoCD — and has one documented end‑to‑end
+    remediation (detected a stuck <code>newt‑tunnel</code> rollout, force‑synced
+    via ArgoCD, recovered).
+  </p>
+
+  <p>
+    The <strong>compliance loop</strong> (WORKER → JUDGE → SCRIBE, top path)
+    is partly wired. The JUDGE workflow is live on the Forgejo runner,
+    triggered on every push to <code>main</code> — it fetches the latest
+    compliance JSON, parses it, and posts the verdict. The last successful
+    run was on 2026‑04‑16 against the OPS‑188 merge.
+  </p>
+  <p>
+    What remains broken is downstream. <strong>COMPLIANCE‑SCRIBE has never
+    been instantiated.</strong> Every entry in the SSP corpus so far was
+    written by a generic WORKER session, not from a <code>scribe/post‑issue‑*</code>
+    branch — which is COMP‑9 violation #5. And the <code>CLAUDE.md</code>
+    assertion rules still permit a WORKER to claim a control "implemented"
+    if it saw a check pass <em>"this session"</em>, which is the loophole
+    that let COMP‑8's agent assert "125/125 PASS" back in March. The trigger
+    is wired; the rules that made the original incident possible are not
+    yet rewritten.
+  </p>
+</section>
+
+<section>
+  <h2>Compliance snapshot — 2026‑04‑17</h2>
+
+  <p>Fresh run of <code>nist-compliance-check.sh</code> on the jumpbox. The full JSON is committed to this repo at <code>evidence/compliance-2026-04-17.json</code> — judges can click through and audit.</p>
+
+  <div class="compliance-detail">
+    <table>
+      <thead><tr><th>Status</th><th>Control</th><th>Check</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag fail">FAIL</span></td><td class="mono">CP‑9</td><td>backup_freshness</td><td>2/3 backup sets fresh; <code>gitlab‑backup=MISSING</code></td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">CM‑3(2)</td><td>argocd_sync</td><td>27/28 Healthy, <strong>2/28 Synced</strong> (7%)</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">AU‑6</td><td>wazuh_alerts_24h</td><td>No alerts in 24h (API returned 0)</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">IR‑6</td><td>alert_notifications</td><td>No notification integrations found</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">IR‑5</td><td>alert_volume</td><td>Low alert volume (0) — may indicate gaps</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">AT‑2</td><td>training_records</td><td>No formal security awareness training records</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">AU‑10</td><td>non_repudiation</td><td>Cannot verify Wazuh logging config</td></tr>
+        <tr><td><span class="tag warn">WARN</span></td><td class="mono">SA‑10</td><td>dev_config_mgmt</td><td>CI exists but no branch protection rules</td></tr>
+        <tr><td><span class="tag pass">PASS ×117</span></td><td colspan="3" style="color: var(--text-muted);">including 19 checks that <em>cannot</em> fail (see <code>evidence/check-strength.yaml</code>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The 19 structurally‑inadequate checks</h3>
+  <p style="color: var(--text-muted); font-size: 0.92rem;">From the platform's own <code>check‑strength.yaml</code>, authored by the operator after a 2026‑03‑18 audit. These check default platform behaviour that is definitionally always true. A few entries, verbatim:</p>
+
+  <blockquote><strong>AC‑3 okd_rbac — trivial:</strong> "Checks &gt;50 ClusterRoles. OKD ships with hundreds by default."</blockquote>
+  <blockquote><strong>CA‑2 compliance_timer — trivial:</strong> "Script checks if its own timer is running. Circular."</blockquote>
+  <blockquote><strong>IA‑2(1) mfa_configured — misleading:</strong> "Hard‑codes 'OTP enabled for admin' in output. Only checks Keycloak realm exists, not that OTP is actually configured."</blockquote>
+  <blockquote><strong>SC‑7 firewall_sca — proxy:</strong> "Uses same SCA score threshold as CM‑6. If CM‑6 passes, SC‑7 always passes."</blockquote>
+</section>
+
+<section>
+  <h2>Evidence chains</h2>
+
+  <p>
+    Three real paper trails from the platform's issue tracker. The first two
+    show the intended flow producing verifiable artifacts. The third is the
+    failure case — exactly the thing the architecture was supposed to prevent,
+    caught and documented by the platform itself.
+  </p>
+
+  <article class="evidence-card">
+    <span class="issue-id">OPS‑56</span>
+    <h3>Sentinel‑agent built, deployed, demonstrated</h3>
+    <p>Design document → ~3,000 lines of code → deployment on the jumpbox → 5‑minute systemd timer → proof of life on a real incident.</p>
+    <ol class="steps">
+      <li><strong>Design:</strong> <code>overwatch/docs/autonomous-operations-architecture.md</code> (39 KB)</li>
+      <li><strong>Code:</strong> <code>overwatch/sentinel-agent/</code> — 29 files, polls Plane + Wazuh + ArgoCD</li>
+      <li><strong>Deployed:</strong> <code>/opt/sentinel-agent/</code>, Vault AppRole scoped, 5‑min timer</li>
+      <li><strong>Proof of life:</strong> detected a stuck <code>newt‑tunnel</code> rollout via ArgoCD health drift, force‑synced, rollout succeeded</li>
+      <li><strong>Tier‑2 proof:</strong> <code>OPS‑74</code> synthetic escalation — rule said ESCALATE → Gemini 2.5 Flash said tier2, matched rule expectation</li>
+    </ol>
+    <p style="margin-top: 0.8em; font-size: 0.92em; color: var(--text-muted);"><em>What this shows:</em> the operational side of the architecture works end‑to‑end on a real incident, not just in design.</p>
+  </article>
+
+  <article class="evidence-card">
+    <span class="issue-id">OPS‑188</span>
+    <h3>Multi‑repo change with documented Judge step — closest to intended flow</h3>
+    <p>Forgejo OIDC migration, spanning two repos. Four merged PRs. Judge verified all five doc criteria. Two follow‑ups spawned for discovered scope.</p>
+    <ol class="steps">
+      <li><code>sentinel-iac</code> PR #27 — declarative Keycloak client via <code>community.general.keycloak_client</code> + Forgejo auth‑source</li>
+      <li><code>sentinel-iac</code> PR #28 — <code>ansible-lint key-order</code> fixes</li>
+      <li><code>sentinel-iac</code> PR #29 — defensive guards + one‑click operator runbook wired into Forgejo Actions</li>
+      <li><code>overwatch-gitops</code> PR #33 — OIDC client count 14 → 15, Vault secret path registered</li>
+      <li>Judge result logged: <em>"PASS for all 5 doc criteria (13–17)"</em></li>
+      <li>Follow‑ups: <code>OPS‑189</code> (CM‑2 drift check), <code>OPS‑190</code> (pre‑existing lint)</li>
+    </ol>
+    <p style="margin-top: 0.8em; font-size: 0.92em; color: var(--text-muted);"><em>Honest caveat:</em> the session explicitly recorded session‑level blockers (no SSH from that agent's scope, standing rule against rotating operator secrets) and handed off the live trigger to the operator. That is the correct behaviour — close to the designed flow, not fully autonomous.</p>
+  </article>
+
+  <article class="evidence-card">
+    <span class="issue-id bad">COMP‑8 → COMP‑9</span>
+    <h3>The failure case, caught by the platform itself</h3>
+    <p><strong>COMP‑9</strong> (priority: <em>high</em>, status: still <em>Backlog</em>, opened 2026‑03‑26, title: <em>"WORKER/JUDGE/SCRIBE pipeline never operationalized — 5 documented violations"</em>). The issue body as filed in March, verbatim from Plane:</p>
+    <blockquote>
+      Finding: The WORKER → JUDGE → SCRIBE pipeline exists as documentation
+      (agent‑roles.md, 2026‑03‑18) but has <strong>0% implementation</strong>.
+      The JUDGE script exists but is not wired to any trigger (no git hooks,
+      no CI, no cron).
+      <br><br>
+      <strong>COMP‑8:</strong> Asserted "125/125 PASS" and committed SSP
+      changes — no SCRIBE handoff.
+    </blockquote>
+    <p style="margin-top: 0.8em;">At the time COMP‑8's agent claimed 125/125 PASS, the actual number — had the Judge been wired up and run — was <strong>117/125 with 1 FAIL, overall NON‑COMPLIANT</strong>. The agent's confident assertion was wrong, and the pipeline meant to catch that kind of assertion wasn't running.</p>
+    <p style="margin-top: 0.8em;"><strong>State as of 2026‑04‑17:</strong> the Judge trigger was wired up sometime between COMP‑9's filing and now — a Forgejo Actions workflow (<code>judge-verify.yml</code>) runs on every push to <code>main</code>, and the last three merges show successful Judge runs. But COMP‑9 remains in Backlog because three of its five violations are still open: the self‑verification loophole in CLAUDE.md, the absence of any SCRIBE session, and the past operator‑only file edits that were never rolled back. The <em>trigger</em> is fixed. The <em>rules that made the original incident possible</em> are not.</p>
+    <p style="font-size: 0.92em; color: var(--text-muted); margin-top: 0.8em;"><em>Why this is the submission, not just a footnote:</em> a four‑week window between "issue filed" and "partial fix visible" is itself the thesis. Without Judge enforcement the first violation would still be shipping. The audit trail, not agent confidence, is what caught and sequenced the remediation.</p>
+  </article>
+</section>
+
+<section>
+  <h2>Honest gaps</h2>
+
+  <p>These are real. None is hidden. A showcase that only advertised strengths would refute its own thesis.</p>
+
+  <ul class="gap-list">
+    <li>
+      <span class="gap-tag">COMP‑9</span>
+      <span>Filed 2026‑03‑26 against five specific violations, still in Backlog. Judge trigger has since been wired (<code>judge-verify.yml</code> on Forgejo, last run 2026‑04‑16, succeeded); three violations remain open — the CLAUDE.md self‑verification loophole, no SCRIBE session ever run, and past operator‑file edits that were never rolled back.</span>
+    </li>
+    <li>
+      <span class="gap-tag">CP‑9</span>
+      <span>The single real FAIL: <code>gitlab-backup=MISSING</code>. A downstream casualty of the Forgejo migration — the backup check was not updated when GitLab was retired. The platform went NON‑COMPLIANT as a side effect of a migration whose paper trail was otherwise exemplary.</span>
+    </li>
+    <li>
+      <span class="gap-tag">CACHE</span>
+      <span>The compliance‑check timer on the jumpbox is healthy — it ran at 06:03 UTC yesterday and writes fresh JSON to <code>/var/log/sentinel/</code> and MinIO daily. The stale artifact was only the workstation‑side git mirror at <code>sentinel-cache/config-cache/</code>, which hadn't been synced against the jumpbox output for two months. The platform knows its posture; the repo that stores it did not.</span>
+    </li>
+    <li>
+      <span class="gap-tag">DOC‑DRIFT</span>
+      <span><code>agent-roles.md</code> still lists the code host as GitLab, even though OPS‑188 completed the migration to Forgejo a week earlier. The document is operator‑only; the agents that migrated the code could not fix the doc describing them.</span>
+    </li>
+    <li>
+      <span class="gap-tag">COVERAGE</span>
+      <span>Even the honest 92.5% meaningful pass rate only covers 47% of the NIST Moderate baseline. More than half of applicable controls have no automated verification at all — only attestation.</span>
+    </li>
+    <li>
+      <span class="gap-tag">REGRESSION</span>
+      <span>One month ago: 120 / 5 / 0. Today: 117 / 7 / 1. The platform's posture drifted worse, not better, while agents were reporting progress on it.</span>
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2>What you can click through to verify</h2>
+
+  <ul class="link-list">
+    <li>
+      <a class="path" href="evidence/compliance-2026-04-17.json">evidence/compliance-2026-04-17.json</a>
+      <span class="desc">Full raw output of <code>nist-compliance-check.sh</code>, 2026‑04‑17, 125 checks.</span>
+    </li>
+    <li>
+      <a class="path" href="evidence/compliance-strength-weighted-2026-04-17.txt">evidence/compliance-strength-weighted-2026-04-17.txt</a>
+      <span class="desc">Derivation of the 92.5% meaningful pass rate from the JSON × check-strength classification.</span>
+    </li>
+    <li>
+      <a class="path" href="evidence/check-strength.yaml">evidence/check-strength.yaml</a>
+      <span class="desc">The platform's self‑critical classification of its own checks (<em>trivial</em> / <em>weak</em> / <em>misleading</em> / <em>proxy</em>). The thesis artifact.</span>
+    </li>
+    <li>
+      <a class="path" href="showcase-ground-truth.md">showcase-ground-truth.md</a>
+      <span class="desc">One entry per claim on this page, with verification method. If a claim here isn't in that file, it didn't make it in.</span>
+    </li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  <div class="row">
+    <span>Snapshot: <strong>2026‑04‑17</strong></span>
+    <span>Showcase build: <code id="sha">(commit pending)</code></span>
+  </div>
+  <div class="row">
+    <span>Static HTML · no live calls · self‑contained · system fonts</span>
+    <span>BSides Fort Wayne 2025</span>
+  </div>
+  <div class="method">
+    <strong>Method:</strong> every number on this page was derived from files committed to this repo.
+    Compliance JSON is verbatim output of a 2,829‑line bash script run on the platform's jumpbox,
+    piped to disk, scp'd here. Strength classification is verbatim from the operator's own audit file.
+    Evidence quotes are verbatim from the platform's issue tracker. If you disagree with any number,
+    <code>jq</code> and <code>diff</code> are authoritative — not the page.
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('themeToggle');
+    btn.addEventListener('click', function(){
+      var cur = document.documentElement.getAttribute('data-theme');
+      if (cur === 'dark') { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+      else { document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+    });
+  })();
+</script>
+</body>
+</html>

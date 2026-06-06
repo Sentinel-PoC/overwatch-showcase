@@ -1,0 +1,53 @@
+---
+# OPS-331: minimum-viable CI for overwatch-showcase.
+# This repo is a frozen-snapshot static HTML + evidence docs collection.
+# No code to lint. Appropriate gate: gitleaks secret detection, which
+# prevents accidental key commits in compliance evidence files.
+# Mirrors the gitleaks job pattern from sentinel-iac / claude-config.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gitleaks:
+    runs-on: iac
+    steps:
+      - name: Skip scan on docs-only PR
+        id: skip_scan
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          FILES=$(curl -sk -H "Authorization: token ${GITHUB_TOKEN}" \
+            "https://forgejo.208.haist.farm/api/v1/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?limit=300" \
+            | jq -r '.[].filename // empty' 2>/dev/null || echo "")
+          if [ -z "$FILES" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          SCANNABLE=$(echo "$FILES" | { grep -vE '(\.md$|^AGENT-STATE\.md$|^docs/)' 2>/dev/null || true; } | wc -l)
+          if [ "${SCANNABLE:-1}" -eq "0" ]; then
+            echo "Docs-only PR — skipping gitleaks scan"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.skip_scan.outputs.skip != 'true'
+        with:
+          path: gitleaks
+
+      - name: Gitleaks secret detection
+        if: steps.skip_scan.outputs.skip != 'true'
+        working-directory: gitleaks
+        run: |
+          echo "Running gitleaks secret detection..."
+          gitleaks detect --source . --report-format json --report-path gitleaks-report.json
+          echo "No secrets detected."
+
+      - uses: actions/upload-artifact@v3
+        if: always() && steps.skip_scan.outputs.skip != 'true' && hashFiles('gitleaks/gitleaks-report.json') != ''
+        with:
+          name: gitleaks-report
+          path: gitleaks/gitleaks-report.json

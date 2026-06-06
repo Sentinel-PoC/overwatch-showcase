@@ -1,0 +1,15 @@
+=== strength-weighted breakdown ===
+strong_or_moderate       : total=106 PASS=98 FAIL=1 WARN=7 pass_rate=92%
+trivial                  : total=8 PASS=8 FAIL=0 WARN=0 pass_rate=100%
+  controls: AC-3,AU-11,CA-2,CM-7,IA-4,IA-8,SC-39,SI-4
+weak                     : total=7 PASS=7 FAIL=0 WARN=0 pass_rate=100%
+  controls: AC-5,AT-1,AT-3,CP-2,CP-4,IR-1,SA-22
+misleading               : total=1 PASS=1 FAIL=0 WARN=0 pass_rate=100%
+  controls: IA-2(1)
+proxy                    : total=3 PASS=3 FAIL=0 WARN=0 pass_rate=100%
+  controls: AC-6(2),AU-5,SC-7
+
+MEANINGFUL CHECKS: 98/106 pass = 92.5%
+RAW CHECKS      : 117/125 pass = 93.6%
+CONTROL COVERAGE: 121/226 = 53%
+MEANINGFUL COVERAGE: 106/226 = 46.9%

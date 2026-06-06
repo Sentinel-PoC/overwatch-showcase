@@ -1,0 +1,5 @@
+*.tmp
+.env
+.env.*
+plane_key.txt
+AGENT-STATE.md
